@@ -1,6 +1,6 @@
 # SWOT Water Depth Analysis for Channel Country River System
 
-This repository contains a Jupyter notebook for analyzing SWOT (Surface Water and Ocean Topography) satellite data to derive floodwater depth measurements for the Thomson River, Cooper Creek system in inland Australia.
+This repository contains Jupyter notebooks for analysing SWOT (Surface Water and Ocean Topography) Pixel Cloud data to quantify floodwater depth  in inland Australia, with a primary focus on the Cooper Creek–Thomson River system within the Channel Country.
 
 ## Overview
 
