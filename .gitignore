@@ -1,0 +1,35 @@
+# Python environment
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large files
+*.zip
+jupyter-master/
+*.html
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local data
+output/
+*.log
+
+# Sensitive files (optional - uncomment if using credentials)
+# _netrc
+# cbym-451205-5ff0ef5f6b76.json
