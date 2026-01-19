@@ -30,6 +30,10 @@ Thumbs.db
 output/
 *.log
 
-# Sensitive files (optional - uncomment if using credentials)
-# _netrc
-# cbym-451205-5ff0ef5f6b76.json
+# Sensitive credentials - DO NOT COMMIT
+_netrc
+*.netrc
+cbym-451205-5ff0ef5f6b76.json
+gee-credentials.json
+*-service-account.json
+gee_key.json

@@ -1,0 +1,12 @@
+# NASA Earthdata Credentials Template
+
+# This file should be placed at: ~/.netrc
+# Set permissions with: chmod 600 ~/.netrc
+
+# Add your NASA Earthdata login credentials below:
+# Replace YOUR_USERNAME and YOUR_PASSWORD with your actual credentials
+# Available at: https://urs.earthdata.nasa.gov/
+
+machine urs.earthdata.nasa.gov
+    login YOUR_USERNAME
+    password YOUR_PASSWORD
