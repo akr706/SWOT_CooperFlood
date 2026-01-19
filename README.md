@@ -1,29 +1,36 @@
 # SWOT Water Depth Analysis for Channel Country River System
 
-This repository contains a Jupyter notebook for analyzing SWOT (Surface Water and Ocean Topography) satellite data to derive floodwater depth measurements for the Channel Country river system in inland Australia.
+This repository contains a Jupyter notebook for analyzing SWOT (Surface Water and Ocean Topography) satellite data to derive floodwater depth measurements for the Thomson River, Cooper Creek system in inland Australia.
 
 ## Overview
 
 In April 2025, the Channel Country river system experienced one of the most severe flood events on record. This workflow demonstrates the derivation of floodwater depth from SWOT Pixel Cloud (PIXC) observations, integrated with LiDAR-derived Digital Elevation Model (DEM) data and complementary optical satellite imagery.
 
-## Features
+## Study Area
 
-- **SWOT L2 HR Pixel Cloud data retrieval** from NASA Earthdata
-- **Sentinel-2 optical imagery** for water extent mapping (MNDWI-based)
-- **Quality assurance filtering** (water fraction, classification, false detection)
+- **River**: Thomson River, Cooper Creek
+- **Region**: Channel Country, Queensland, Australia  
+- **SWOT Reach ID**: 56829100071
+- **Coordinates**: ~143.2°E to 143.3°E, -24.4°S to -24.3°S
+
+## Key Features
+
+- **SWOT L2 HR Pixel Cloud data** automated retrieval from NASA Earthdata
+- **Sentinel-2 optical imagery** water extent mapping using MNDWI
+- **Quality assurance** filtering (water fraction, classification, false detection rate)
 - **Tidal and atmospheric corrections** (pole tide, load tide, solid earth tide)
-- **Coordinate transformations** (WGS84 ellipsoidal → Australian Height Datum)
-- **DEM-based depth derivation** using AUSGeoid and LiDAR DEM
+- **Coordinate transformations** WGS84 → GDA94 → MGA54 (Australian datums)
+- **Accurate depth calculation** water surface (SWOT - AUSGeoid) - riverbed (LiDAR DEM)
 - **Statistical outlier removal** using KDTree spatial analysis
-- **Visualization and export** to multiple geospatial formats
+- **Visualization and export** to Shapefile, GeoPackage, CSV, and KML formats
 
 ## Requirements
 
 ### System Requirements
 - Python 3.8 or higher
 - Jupyter Notebook or JupyterLab
-- Minimum 8GB RAM (16GB recommended for large datasets)
-- Internet connection for data download
+- Minimum 8GB RAM (16GB+ recommended for large LiDAR files)
+- Internet connection for satellite data download
 
 ### Python Dependencies
 
@@ -41,7 +48,6 @@ pyproj
 matplotlib
 scipy
 netCDF4
-dask
 ```
 
 ## Installation
@@ -53,24 +59,28 @@ git clone https://github.com/akr706/SWOT_CooperFlood.git
 cd SWOT_CooperFlood
 ```
 
-### 2. Create Virtual Environment (Recommended)
+### 2. Install Dependencies
+
+The notebook includes an automatic installation in the first cell, or install manually:
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install numpy pandas geopandas shapely xarray rasterio earthengine-api geemap earthaccess pyproj matplotlib scipy netCDF4
 ```
 
-### 3. Install Dependencies
+## Data Files
 
-The notebook includes an automatic installation cell, or you can install manually:
+This repository includes:
+- **SWOT_Water_Depth_Analysis.ipynb** - Main analysis notebook
+- **au_ga_AUSGeoid09_V1.01.tif** - AUSGeoid09 geoid model for datum correction
+- **CooperLiDAR_DEM_25m.tif** - LiDAR DEM (25m resolution) for riverbed elevation
 
-```bash
-pip install numpy pandas geopandas shapely xarray rasterio earthengine-api geemap earthaccess pyproj matplotlib scipy netCDF4 dask
-```
+**Note**: The LiDAR DEM file is large (~250MB). For other study areas, replace with your own DEM.
 
 ## Authentication Setup
 
 ### NASA Earthdata Login
+
+Required for downloading SWOT data:
 
 1. Create a free account at https://urs.earthdata.nasa.gov/
 2. Create a `.netrc` file in your home directory:
@@ -80,7 +90,7 @@ pip install numpy pandas geopandas shapely xarray rasterio earthengine-api geema
 nano ~/.netrc
 ```
 
-Add the following content:
+Add the following:
 
 ```
 machine urs.earthdata.nasa.gov
@@ -96,35 +106,17 @@ chmod 600 ~/.netrc
 
 ### Google Earth Engine
 
-1. Sign up for Google Earth Engine: https://earthengine.google.com/
-2. Create a service account or use local authentication:
-   - **Service Account**: Download JSON credentials and update path in notebook
-   - **Local Authentication**: Run `ee.Authenticate()` when prompted
+Required for Sentinel-2 imagery:
 
-Place your service account JSON file in the repository:
-```
-cbym-451205-5ff0ef5f6b76.json
-```
+1. Sign up at https://earthengine.google.com/
+2. **Option A - Service Account** (recommended for automation):
+   - Create a Google Cloud project
+   - Create a service account and download JSON credentials
+   - Update `credentials_path` in notebook cell 7
+   
+3. **Option B - Interactive Authentication**:
+   - Run `ee.Authenticate()` when prompted in the notebook
 
-## Data Requirements
-
-### Required Input Files
-
-1. **AUSGeoid DEM** (for datum correction)
-   - File: `au_ga_AUSGeoid09_V1.01.tif`
-   - Source: Geoscience Australia
-   - Place in repository root
-
-2. **LiDAR DEM** (for riverbed elevation - optional)
-   - File: `CooperLiDAR_DEM_25m.tif`
-   - Source: State/Federal LiDAR datasets
-   - Place in repository root
-
-### Automatically Retrieved Data
-
-- SWOT L2 HR PIXC data (via NASA Earthdata)
-- Sentinel-2 imagery (via Google Earth Engine)
-- SWORD river network (via Google Earth Engine)
 
 ## Running the Notebook
 
@@ -134,19 +126,13 @@ cbym-451205-5ff0ef5f6b76.json
 jupyter notebook SWOT_Water_Depth_Analysis.ipynb
 ```
 
-Or with JupyterLab:
-
-```bash
-jupyter lab SWOT_Water_Depth_Analysis.ipynb
-```
-
 ### 2. Configure Parameters
 
-Edit the configuration cell (Step 2) to customize:
+In notebook cell 7, update these parameters for your study area:
 
 ```python
 # Study Area Parameters
-SELECTED_REACH_ID = 56829100071  # Thomson River reach identifier
+SELECTED_REACH_ID = 56829100071  # SWORD reach identifier
 SELECTED_NODE_ID = 56829100070271  # Node within reach
 
 # Data Download Parameters
@@ -157,163 +143,156 @@ SENTINEL_DATES = ('2025-03-29', '2025-04-01')  # Sentinel-2 date range
 OUTPUT_BASE_DIR = f'/path/to/output/{SELECTED_REACH_ID}'
 ```
 
-### 3. Run All Cells
+### 3. Execute Cells Sequentially
 
-Execute cells sequentially:
-- Cell 1: Install packages
-- Cell 5: Import libraries
-- Cell 7: Configure parameters
-- Cell 9: Initialize Google Earth Engine
-- Cell 11: Define study area
-- Cell 13: Acquire Sentinel-2 water mask
-- Cell 15: Download SWOT data
-- Cell 16: Generate KML file
-- Cell 18: Load and filter SWOT data
-- Cell 21: Apply quality filters and tidal corrections
-- Cell 23: Transform coordinates to AHD
-- Cell 25: Derive water surface elevation
-- Cell 27: Statistical outlier removal
-- Cell 29-30: Visualization
-- Cell 32: Export results
+Run all cells in order (cells 1-32). **Important**: Do not skip cells as later cells depend on variables created in earlier ones.
 
-## Workflow Steps
+## Workflow Overview
 
-### Step 1-2: Environment Setup
-- Install dependencies
-- Import libraries
-- Configure paths and parameters
+### Data Acquisition
+1. **Sentinel-2 Imagery** - MNDWI water mask creation via Google Earth Engine
+2. **SWOT Data** - Download L2 HR PIXC NetCDF files from NASA Earthdata
+3. **KML Export** - Generate KML file of water extent
 
-### Step 3-4: Study Area Definition
-- Initialize Google Earth Engine
-- Load SWORD river network dataset
-- Select reach and node
-- Create 6km buffer AOI
+### Data Processing
+4. **Spatial Filtering** - Filter SWOT points to study area bounding box
+5. **Quality Filtering** - Apply classification, water fraction, and false detection filters
+6. **Tidal Corrections** - Remove pole tide, load tide, and solid earth tide effects
 
-### Step 5: Satellite Data Acquisition
-- **Sentinel-2**: MNDWI-based water mask creation
-- **SWOT**: Download L2 HR PIXC NetCDF files from NASA Earthdata
+### Depth Calculation
+7. **Coordinate Transformation** - WGS84 → GDA94 → MGA54
+8. **Datum Correction** - Subtract AUSGeoid to convert ellipsoidal height to AHD
+9. **Riverbed Subtraction** - Subtract LiDAR DEM to get actual water depth
+   ```
+   depth = (SWOT_height - AUSGeoid) - LiDAR_DEM
+   ```
 
-### Step 6: SWOT Data Loading
-- Load NetCDF pixel cloud data
-- Apply spatial bounding box filter
-- Extract water-related variables
-
-### Step 7: Quality Assurance
-- Convert to 2D slant-plane arrays
-- Apply classification filters (water, dark water, low coherence)
-- Water fraction filtering (1-99%)
-- False detection rate threshold (<2%)
-- Tidal corrections (pole tide, load tide, solid earth tide)
-
-### Step 8: Coordinate Transformation
-- Transform from WGS84 ellipsoidal to GDA94 (Australian Datum)
-- Prepare for DEM integration
-
-### Step 9: Water Surface Elevation
-- **Datum correction**: Convert ellipsoidal height to AHD using AUSGeoid
-- **Output**: Water surface elevation in Australian Height Datum
-
-> **Note**: For full water depth calculation, subtract LiDAR DEM riverbed elevation:
-> `depth = height_ahd - riverbed_elevation`
-
-### Step 10: Outlier Removal
-- KDTree-based statistical outlier detection
-- Adaptive k-nearest neighbors
-- Remove anomalous points
-
-### Step 11: Visualization
-- Spatial scatter plots with depth color coding
-- Statistical distributions (histogram, box plot)
-- Summary statistics
-
-### Step 12: Export
-- GeoDataFrame creation
-- Export to Shapefile, GeoPackage, CSV
-- Save processed results for GIS integration
+### Quality Control & Export
+10. **Outlier Removal** - KDTree-based statistical filtering
+11. **Visualization** - Scatter plots, histograms, statistics
+12. **Export** - Save to Shapefile, GeoPackage, and CSV
 
 ## Output Files
 
-All outputs are saved to: `OUTPUT_BASE_DIR/<reach_id>/`
+Results are saved to `OUTPUT_BASE_DIR/<reach_id>/`:
 
-### Generated Files
+- **SWOT NetCDF**: `<date>/SWOT_L2_HR_PIXC_*.nc`
+- **Sentinel-2 Water Mask**: `kml/sentinel2_water_mask.tif`, `kml/Sentinel2_water_extent_*.kml`
+- **Processed Depth Data**: 
+  - `swot_depth_processed.shp` (Shapefile)
+  - `swot_depth_processed.gpkg` (GeoPackage)
+  - `swot_depth_processed.csv` (CSV with lat, lon, depth_m)
 
-1. **SWOT NetCDF Data**
-   - Location: `OUTPUT_BASE_DIR/<reach_id>/<date>/`
-   - Files: `SWOT_L2_HR_PIXC_*.nc`
+## Methodology
 
-2. **Sentinel-2 Water Mask**
-   - Location: `OUTPUT_BASE_DIR/<reach_id>/kml/`
-   - Files: 
-     - `sentinel2_water_mask.tif` (GeoTIFF)
-     - `Sentinel2_water_extent_<date>.kml` (KML polygon)
+### Depth Calculation Formula
 
-3. **Processed Water Depth Data**
-   - Location: `OUTPUT_BASE_DIR/<reach_id>/`
-   - Files:
-     - `swot_depth_processed.shp` (Shapefile)
-     - `swot_depth_processed.gpkg` (GeoPackage)
-     - `swot_depth_processed.csv` (CSV)
+The water depth above riverbed is calculated in two steps:
 
-## Customization
+**Step 1: Datum Correction**
+```
+water_surface_AHD = SWOT_ellipsoidal_height - AUSGeoid_separation
+```
+- Converts WGS84 ellipsoidal height to Australian Height Datum (AHD)
+- AUSGeoid09 provides the geoid-ellipsoid separation
 
-### Adapt for Other River Systems
+**Step 2: Depth Calculation**
+```
+water_depth = water_surface_AHD - LiDAR_riverbed_elevation_AHD
+```
+- Subtracts riverbed elevation from water surface elevation
+- Both in AHD reference frame
 
-1. **Change Study Area**:
-   ```python
-   SELECTED_REACH_ID = <your_reach_id>
-   SELECTED_NODE_ID = <your_node_id>
-   ```
+### Coordinate Systems
 
-2. **Update Bounding Box**:
-   ```python
-   bbox = (minlon, minlat, maxlon, maxlat)  # Your AOI coordinates
-   bounding_box=(minlon, minlat, maxlon, maxlat)  # For SWOT search
-   ```
+- **WGS84 (EPSG:4326)** - SWOT raw data
+- **GDA94 (EPSG:4283)** - Australian geodetic datum (lat/lon)
+- **MGA54 (EPSG:28354)** - Map Grid of Australia Zone 54 (projected, meters)
+- **AHD** - Australian Height Datum (vertical reference)
 
-3. **Adjust Date Range**:
-   ```python
-   SWOT_DATES = ('YYYY-MM-DD', 'YYYY-MM-DD')
-   SENTINEL_DATES = ('YYYY-MM-DD', 'YYYY-MM-DD')
-   ```
+The LiDAR DEM is in MGA54 projected coordinates, so SWOT points are transformed: WGS84 → GDA94 → MGA54 for DEM sampling.
 
-4. **Update DEM Paths**:
-   - Replace with appropriate geoid model for your region
-   - Use local LiDAR or SRTM/ASTER DEM
+
+## Customization for Other Study Areas
+
+### 1. Find Your River Reach
+
+Use the SWORD (Surface Water and Ocean Topography Reference) database:
+- Browse: https://www.swordrivers.org/
+- Find your river's reach_id and node_id
+- Update in notebook cell 7
+
+### 2. Provide Your Own DEMs
+
+Replace these files with DEMs covering your study area:
+- **Geoid model** (for datum correction) - replace `au_ga_AUSGeoid09_V1.01.tif`
+- **LiDAR/SRTM DEM** (for riverbed elevation) - replace `CooperLiDAR_DEM_25m.tif`
+
+Ensure DEMs have:
+- Proper CRS metadata
+- NoData values defined
+- Coverage overlapping your SWOT observations
+
+### 3. Update Date Ranges
+
+```python
+SWOT_DATES = ('YYYY-MM-DD', 'YYYY-MM-DD')
+SENTINEL_DATES = ('YYYY-MM-DD', 'YYYY-MM-DD')
+```
+
+Check SWOT coverage: https://swot.jpl.nasa.gov/
 
 ## Troubleshooting
 
 ### Common Issues
 
-**1. NASA Earthdata Authentication Failure**
-- Verify `.netrc` file exists in home directory
-- Check file permissions: `chmod 600 ~/.netrc`
-- Verify credentials are correct
+**1. NASA Earthdata Authentication Failed**
+```bash
+# Verify .netrc file exists and has correct permissions
+ls -la ~/.netrc
+chmod 600 ~/.netrc
+```
 
-**2. Google Earth Engine Authentication**
-- Run `ee.Authenticate()` for first-time setup
-- Check service account credentials path
-- Verify GEE account is activated
+**2. Google Earth Engine Not Authenticated**
+```python
+# In notebook, run:
+ee.Authenticate()
+```
 
-**3. Memory Issues with Large DEMs**
-- The LiDAR DEM processing may cause kernel crashes
-- Consider using smaller spatial subsets
-- Process in batches with reduced point counts
+**3. Kernel Crashes with Large DEMs**
+- The notebook uses windowed reading to prevent memory issues
+- If problems persist, reduce batch_size in cell 25 (default: 10000)
 
-**4. Missing Data**
-- SWOT data may not be available for all dates/locations
-- Check SWOT coverage using: https://swot.jpl.nasa.gov/
-- Sentinel-2 data requires <50% cloud cover
+**4. No SWOT Data Found**
+- Check if SWOT has coverage for your dates/location
+- SWOT has 21-day repeat cycle with limited spatial coverage
+- Visit: https://swot.jpl.nasa.gov/mission/coverage/
 
-**5. Coordinate System Mismatches**
-- Ensure DEM files are in appropriate CRS
-- Verify datum transformations are correct for your region
+**5. All Depth Values are NaN**
+- Check coordinate system match between SWOT data and LiDAR DEM
+- Verify DEM coverage overlaps SWOT observation area
+- Check DEM nodata values
 
-## Data Sources
+**6. Negative Depth Values**
+- Can occur due to measurement uncertainties
+- Use outlier removal (cell 27) to filter anomalies
+- Adjust `OUTLIER_STD_MULT` parameter if needed
 
-- **SWOT L2 HR Pixel Cloud**: NASA/CNES (https://podaac.jpl.nasa.gov/)
-- **Sentinel-2**: ESA Copernicus Program (via Google Earth Engine)
-- **SWORD River Network**: https://www.swordrivers.org/
-- **AUSGeoid**: Geoscience Australia (https://www.ga.gov.au/)
+## Data Sources & References
+
+### Data
+- **SWOT Mission**: NASA/CNES - https://swot.jpl.nasa.gov/
+- **SWOT L2 PIXC Data**: NASA Earthdata - https://podaac.jpl.nasa.gov/
+- **SWORD River Database**: Allen & Pavelsky (2018) - https://www.swordrivers.org/
+- **Sentinel-2**: ESA Copernicus - https://sentinel.esa.int/
+- **AUSGeoid09**: Geoscience Australia - https://www.ga.gov.au/
+- **Google Earth Engine**: https://earthengine.google.com/
+
+### Publications
+
+- Durand, M., et al. (2010). "The Surface Water and Ocean Topography Mission: Observing Terrestrial Surface Water and Oceanic Submesoscale Eddies." *Proceedings of the IEEE*, 98(5), 766-779.
+- Allen, G. H., & Pavelsky, T. M. (2018). "Global extent of rivers and streams." *Science*, 361(6402), 585-588.
+- McFeeters, S. K. (1996). "The use of the Normalized Difference Water Index (NDWI) in the delineation of open water features." *International Journal of Remote Sensing*, 17(7), 1425-1432.
 
 ## Citation
 
@@ -324,19 +303,12 @@ Kumar, A. et al. (In Process). "SWOT Satellite Assessment for Monitoring the
 Extreme 2025 Floods in Australia's Inland Channel Country."
 ```
 
-## References
-
-- Durand, M., et al. (2010). "The Surface Water and Ocean Topography Mission: Observing Terrestrial Surface Water and Oceanic Submesoscale Eddies." *Proceedings of the IEEE*, 98(5), 766-779.
-- Allen, G. H., & Pavelsky, T. M. (2018). "Global extent of rivers and streams." *Science*, 361(6402), 585-588.
-- McFeeters, S. K. (1996). "The use of the Normalized Difference Water Index (NDWI) in the delineation of open water features." *International Journal of Remote Sensing*, 17(7), 1425-1432.
-
 ## License
 
-This project is available under the MIT License. See LICENSE file for details.
+This project is available under the MIT License.
 
 ## Contact
 
-For questions or issues:
 - **Author**: akr706
 - **Repository**: https://github.com/akr706/SWOT_CooperFlood
 - **Issues**: https://github.com/akr706/SWOT_CooperFlood/issues
@@ -350,5 +322,4 @@ For questions or issues:
 
 ---
 
-**Version**: 1.0  
 **Last Updated**: January 2026
