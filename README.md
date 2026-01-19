@@ -288,12 +288,6 @@ ee.Authenticate()
 - **AUSGeoid09**: Geoscience Australia - https://www.ga.gov.au/
 - **Google Earth Engine**: https://earthengine.google.com/
 
-### Publications
-
-- Durand, M., et al. (2010). "The Surface Water and Ocean Topography Mission: Observing Terrestrial Surface Water and Oceanic Submesoscale Eddies." *Proceedings of the IEEE*, 98(5), 766-779.
-- Allen, G. H., & Pavelsky, T. M. (2018). "Global extent of rivers and streams." *Science*, 361(6402), 585-588.
-- McFeeters, S. K. (1996). "The use of the Normalized Difference Water Index (NDWI) in the delineation of open water features." *International Journal of Remote Sensing*, 17(7), 1425-1432.
-
 ## Citation
 
 If you use this workflow in your research, please cite:
