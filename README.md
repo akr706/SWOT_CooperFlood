@@ -303,7 +303,7 @@ This project is available under the MIT License.
 
 ## Contact
 
-- **Author**: Atul Kumar Rai [ akr706@uowmail.edu.au], Timothy J Cohen [tcohen@uow.edu.au]
+- **Author**: Atul Kumar Rai [ akr706@uowmail.edu.au]
 - **Repository**: https://github.com/akr706/SWOT_CooperFlood
 - **Issues**: https://github.com/akr706/SWOT_CooperFlood/issues
 
