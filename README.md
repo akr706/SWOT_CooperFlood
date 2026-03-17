@@ -293,8 +293,9 @@ ee.Authenticate()
 If you use this workflow in your research, please cite:
 
 ```
-Kumar, A. et al. (In Process). "SWOT Satellite Assessment for Monitoring the 
-Extreme 2025 Floods in Australia's Inland Channel Country."
+"SWOT satellite assessment for monitoring the extreme 2025 floods in Australia’s inland Channel Country" by Rai et al
+DOI 10.1088/1748-9326/ae530f
+url: https://iopscience.iop.org/article/10.1088/1748-9326/ae530f
 ```
 
 ## License
