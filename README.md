@@ -293,9 +293,13 @@ ee.Authenticate()
 If you use this workflow in your research, please cite:
 
 ```
-"SWOT satellite assessment for monitoring the extreme 2025 floods in Australia’s inland Channel Country" by Rai et al
-DOI 10.1088/1748-9326/ae530f
-url: https://iopscience.iop.org/article/10.1088/1748-9326/ae530f
+@article{10.1088/1748-9326/ae530f,
+	author={Rai, Atul Kumar and Cohen, Tim J and Armon, Moshe and Marx, Samuel},
+	title={SWOT satellite assessment for monitoring the extreme 2025 floods in Australia’s inland Channel Country},
+	journal={Environmental Research Letters},
+	url={http://iopscience.iop.org/article/10.1088/1748-9326/ae530f},
+	year={2026},
+}
 ```
 
 ## License
